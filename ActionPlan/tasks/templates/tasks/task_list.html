@@ -39,7 +39,9 @@
                     {% endif %}
                 </td>
                 <td>
+                    {% if user.is_authenticated %}
                     <a href="{% url 'edit_task' task.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
