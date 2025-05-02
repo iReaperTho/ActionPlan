@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from .models import Task
 from .forms import TaskForm
@@ -10,17 +10,16 @@ from .forms import TaskForm2
 # Create your views here.
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
             return redirect('task_list')
         else:
-            messages.error(request, 'Invalid credentials')
-
-    return render(request, 'login.html')
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
 
 def logout_view(request):
     logout(request)
@@ -41,7 +40,12 @@ def signup_view(request):
     return render(request, 'signup.html', {'form': form})
 
 def task_list(request):
-    tasks = Task.objects.all()
+    if request.method == "POST":
+        selected_ids = request.POST.getlist('selected_tasks')
+        Task.objects.filter(id__in=selected_ids, created_by=request.user).delete()
+        return redirect('task_list')
+
+    tasks = Task.objects.all().order_by('-priority')
     return render(request, 'tasks/task_list.html', {'tasks': tasks})
 
 @login_required
@@ -74,3 +78,5 @@ def edit_task(request, task_id):
     else:
         form = TaskForm2(instance=task)
     return render(request, 'tasks/edit_task.html', {'form': form, 'task': task})
+
+

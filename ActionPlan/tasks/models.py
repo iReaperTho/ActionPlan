@@ -12,9 +12,9 @@ class Task(models.Model):
     
 class Task(models.Model): 
     PRIORITY_CHOICES = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
+        (1, 'Low'),
+        (2, 'Medium'),
+        (3, 'High'),
     ]
 
     CATEGORY_CHOICES = [
@@ -32,7 +32,7 @@ class Task(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='low')
+    priority = models.IntegerField(choices=PRIORITY_CHOICES)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
     completed = models.CharField(max_length=20, choices=COMPLETION_CHOICES, default='not completed')
     created_at = models.DateTimeField(auto_now_add=True)
